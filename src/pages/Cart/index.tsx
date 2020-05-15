@@ -1,7 +1,8 @@
-import React, { useMemo } from 'react';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import React, { useCallback, useMemo } from 'react';
 import FeatherIcon from 'react-native-vector-icons/Feather';
 
-import { View } from 'react-native';
+import { View, Text } from 'react-native';
 
 import {
   Container,
@@ -38,24 +39,42 @@ interface Product {
 const Cart: React.FC = () => {
   const { increment, decrement, products } = useCart();
 
-  function handleIncrement(id: string): void {
-    // TODO
-  }
+  const handleIncrement = useCallback(
+    (id: string) => {
+      increment(id);
+    },
+    [increment],
+  );
 
-  function handleDecrement(id: string): void {
-    // TODO
-  }
+  const handleDecrement = useCallback(
+    (id: string) => {
+      decrement(id);
+    },
+    [decrement],
+  );
 
+  // RETURNING THE SUM OF THE QUANTITY OF THE PRODUCTS IN THE CART
   const cartTotal = useMemo(() => {
-    // TODO RETURN THE SUM OF THE QUANTITY OF THE PRODUCTS IN THE CART
+    const total = products.reduce(
+      (accumulator, product) => {
+        accumulator.count += product.price * product.quantity;
+        return accumulator;
+      },
+      { count: 0 },
+    );
 
-    return formatValue(0);
+    return formatValue(total.count);
   }, [products]);
 
+  // RETURNING THE SUM OF THE QUANTITY OF THE PRODUCTS IN THE CART
   const totalItensInCart = useMemo(() => {
-    // TODO RETURN THE SUM OF THE QUANTITY OF THE PRODUCTS IN THE CART
+    const cartItems = products.reduce((accumulator, product) => {
+      const total = accumulator + product.quantity;
 
-    return 0;
+      return total;
+    }, 0);
+
+    return cartItems;
   }, [products]);
 
   return (
@@ -63,12 +82,23 @@ const Cart: React.FC = () => {
       <ProductContainer>
         <ProductList
           data={products}
-          keyExtractor={item => item.id}
+          keyExtractor={(item: any) => item.id}
+          ListEmptyComponent={() => (
+            <View
+              style={{
+                flex: 1,
+                alignItems: 'center',
+              }}
+            >
+              <Text> Carrinho vazio! </Text>
+            </View>
+          )}
           ListFooterComponent={<View />}
           ListFooterComponentStyle={{
             height: 80,
           }}
-          renderItem={({ item }: { item: Product }) => (
+          key={products.length}
+          renderItem={({ item }: any) => (
             <Product>
               <ProductImage source={{ uri: item.image_url }} />
               <ProductTitleContainer>
